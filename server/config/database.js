@@ -12,7 +12,14 @@ const connectionUri = process.env.MYSQL_URL || process.env.DATABASE_URL;
 
 if (connectionUri) {
   console.log('📦 Kết nối MySQL qua Connection URI');
-  pool = mysql.createPool(connectionUri);
+  pool = mysql.createPool({
+    uri: connectionUri,
+    waitForConnections: true,
+    connectionLimit: 10,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
+    connectTimeout: 10000
+  });
 } else {
   // Ưu tiên 2: Biến riêng lẻ (Railway tự inject MYSQLHOST, MYSQLUSER, ...)
   const config = {
