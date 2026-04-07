@@ -114,7 +114,6 @@ async function migrate() {
   
   try {
     for (const sql of TABLES) {
-      // Lấy tên bảng từ câu SQL
       const tableName = sql.match(/CREATE TABLE IF NOT EXISTS (\w+)/)?.[1];
       await pool.execute(sql);
       console.log(`  ✅ Tạo bảng "${tableName}" thành công`);
@@ -123,10 +122,16 @@ async function migrate() {
   } catch (error) {
     console.error('\n❌ Lỗi migration:', error.message);
     throw error;
-  } finally {
-    await pool.end();
   }
 }
 
-// Chạy trực tiếp
-migrate().catch(() => process.exit(1));
+// Export để server có thể gọi khi startup
+module.exports = { migrate };
+
+// Nếu chạy trực tiếp bằng: node server/config/migrate.js
+if (require.main === module) {
+  migrate()
+    .then(() => pool.end())
+    .catch(() => process.exit(1));
+}
+

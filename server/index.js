@@ -154,7 +154,15 @@ async function start() {
   console.log('========================\n');
 
   const dbOk = await testConnection();
-  if (!dbOk) {
+  if (dbOk) {
+    // Auto-migrate: tạo bảng nếu chưa có
+    try {
+      const { migrate } = require('./config/migrate');
+      await migrate();
+    } catch (err) {
+      console.error('⚠️  Auto-migrate thất bại:', err.message);
+    }
+  } else {
     console.log('⚠️  Server vẫn khởi động nhưng DB chưa kết nối');
   }
 
@@ -168,3 +176,4 @@ async function start() {
 }
 
 start();
+
