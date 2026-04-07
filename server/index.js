@@ -153,19 +153,7 @@ async function start() {
   console.log('\n🎮 BVote Mini Game Server');
   console.log('========================\n');
 
-  const dbOk = await testConnection();
-  if (dbOk) {
-    // Auto-migrate: tạo bảng nếu chưa có
-    try {
-      const { migrate } = require('./config/migrate');
-      await migrate();
-    } catch (err) {
-      console.error('⚠️  Auto-migrate thất bại:', err.message);
-    }
-  } else {
-    console.log('⚠️  Server vẫn khởi động nhưng DB chưa kết nối');
-  }
-
+  // 1. Mở cổng HTTP Sever ngay lập tức để qua bài Healthcheck của Railway
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 Server đang chạy tại: http://0.0.0.0:${PORT}`);
     console.log(`📁 Static files: ${path.join(__dirname, '..', 'client')}`);
@@ -173,6 +161,21 @@ async function start() {
     console.log(`🔒 Security: Helmet + CORS + Rate Limit`);
     console.log(`🌍 Env: ${process.env.NODE_ENV || 'development'}\n`);
   });
+
+  // 2. Chạy ngầm các cấu hình và migrate DB sau khi port đã mở thành công
+  try {
+    const dbOk = await testConnection();
+    if (dbOk) {
+      console.log('⏳ Đang kiểm tra và auto-migrate database...');
+      const { migrate } = require('./config/migrate');
+      await migrate();
+      console.log('✅ Hoàn tất cấu hình Database!');
+    } else {
+      console.log('⚠️  Server đang chạy nhưng DB chưa kết nối!');
+    }
+  } catch (err) {
+    console.error('⚠️  Lỗi trong quá trình khởi tạo DB ngầm:', err.message);
+  }
 }
 
 start();
