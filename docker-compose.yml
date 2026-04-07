@@ -1,0 +1,62 @@
+# BVote Mini Game - Docker Compose
+# Chạy: docker compose up -d
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: bvote-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-Anhvinh3901@}
+      MYSQL_DATABASE: bvotegame
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: ${DB_PASSWORD:-123456}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+
+  # Node.js App
+  app:
+    build: .
+    container_name: bvote-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: appuser
+      DB_PASSWORD: ${DB_PASSWORD:-123456}
+      DB_NAME: bvotegame
+      JWT_SECRET: ${JWT_SECRET:-bvote-secret-key-change-in-production}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo '⏳ Chờ DB sẵn sàng...' &&
+        sleep 5 &&
+        echo '🔄 Chạy migration...' &&
+        node server/config/migrate.js &&
+        echo '🌱 Chạy seed...' &&
+        node server/config/seed.js || true &&
+        echo '🚀 Khởi động server...' &&
+        node server/index.js
+      "
+
+volumes:
+  mysql_data:

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="BVote - Thử Thách Tri Thức 20 Ngày. Trả lời câu hỏi, dự đoán kết quả, giành giải thưởng mỗi ngày!">
+  <meta name="theme-color" content="#0a0e14">
+  <title>BVote - Thử Thách Tri Thức 20 Ngày</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="app-container" id="app">
+  <!-- Toast thông báo -->
+  <div class="toast" id="toast">
+    <span class="material-symbols-outlined" id="toast-icon">check_circle</span>
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- ============== TRANG ĐĂNG NHẬP ============== -->
+  <div class="page active" id="page-auth">
+    <div style="padding: var(--space-16) var(--space-6) var(--space-6);">
+      <!-- Logo -->
+      <div class="text-center mb-6">
+        <div style="font-size: 48px; margin-bottom: var(--space-3);">🎮</div>
+        <h1 style="font-size: var(--font-size-3xl); font-weight: 900; background: var(--gradient-hero); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.02em;">BVote</h1>
+        <p class="text-muted" style="margin-top: var(--space-2);">Thử Thách Tri Thức 20 Ngày</p>
+      </div>
+
+      <!-- Login Form -->
+      <div class="glass-card" id="login-form">
+        <h2 style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--space-5);">Đăng nhập</h2>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <div class="form-input-icon">
+              <span class="material-symbols-outlined">mail</span>
+              <input type="email" class="form-input" id="login-email" placeholder="Email của bạn" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-input-icon">
+              <span class="material-symbols-outlined">lock</span>
+              <input type="password" class="form-input" id="login-password" placeholder="Mật khẩu" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-login">Đăng nhập</button>
+        </form>
+        <div class="text-center mt-4">
+          <span class="text-muted">Chưa có tài khoản? </span>
+          <a href="#" onclick="showRegister()" style="color: var(--primary); text-decoration: none; font-weight: 600;">Đăng ký ngay</a>
+        </div>
+      </div>
+
+      <!-- Register Form (ẩn) -->
+      <div class="glass-card hidden" id="register-form">
+        <h2 style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--space-5);">Tạo tài khoản</h2>
+        <form onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <div class="form-input-icon">
+              <span class="material-symbols-outlined">person</span>
+              <input type="text" class="form-input" id="reg-displayname" placeholder="Tên hiển thị" required minlength="2">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-input-icon">
+              <span class="material-symbols-outlined">alternate_email</span>
+              <input type="text" class="form-input" id="reg-username" placeholder="Username" required minlength="3">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-input-icon">
+              <span class="material-symbols-outlined">mail</span>
+              <input type="email" class="form-input" id="reg-email" placeholder="Email" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-input-icon">
+              <span class="material-symbols-outlined">lock</span>
+              <input type="password" class="form-input" id="reg-password" placeholder="Mật khẩu (tối thiểu 6 ký tự)" required minlength="6">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-register">Đăng ký</button>
+        </form>
+        <div class="text-center mt-4">
+          <span class="text-muted">Đã có tài khoản? </span>
+          <a href="#" onclick="showLogin()" style="color: var(--primary); text-decoration: none; font-weight: 600;">Đăng nhập</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TRANG CHỦ / DASHBOARD ============== -->
+  <div class="page" id="page-home">
+    <!-- Top nav -->
+    <div class="top-nav">
+      <span class="logo">BVote</span>
+      <div class="user-greeting">
+        <span class="text-muted" style="font-size: var(--font-size-sm);">Xin chào,</span>
+        <span style="font-weight: 600; font-size: var(--font-size-sm);" id="home-username">Player</span>
+        <div class="user-avatar" id="home-avatar">P</div>
+      </div>
+    </div>
+
+    <div class="px-5">
+      <!-- Hero Card - Thử thách hôm nay -->
+      <div class="hero-card mt-4 mb-6" id="today-hero">
+        <div class="hero-label">🔥 ĐANG DIỄN RA</div>
+        <h2 class="hero-title" id="today-title">Ngày 1 - Thử thách tri thức</h2>
+        <p class="hero-subtitle" id="today-desc">Sẵn sàng chưa? Hãy bắt đầu thử thách hôm nay!</p>
+        <div style="display: flex; gap: var(--space-3); align-items: center;">
+          <button class="btn btn-primary" id="btn-play-today" onclick="startPlaying()">
+            <span class="material-symbols-outlined">play_arrow</span>
+            Chơi ngay
+          </button>
+          <span class="text-muted" style="font-size: var(--font-size-sm);" id="today-questions">3 câu hỏi</span>
+        </div>
+      </div>
+
+      <!-- Tiến trình -->
+      <div class="section-header">
+        <span class="section-title">Tiến trình của bạn</span>
+      </div>
+      <div class="stat-row mb-6">
+        <div class="stat-chip">
+          <div class="stat-value" id="stat-days-played">0</div>
+          <div class="stat-label">Ngày đã chơi</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-value" id="stat-total-score">0</div>
+          <div class="stat-label">Tổng điểm</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-value" id="stat-rank">-</div>
+          <div class="stat-label">Xếp hạng</div>
+        </div>
+      </div>
+
+      <!-- Lịch 20 ngày -->
+      <div class="section-header">
+        <span class="section-title">Lịch 20 ngày</span>
+      </div>
+      <div class="day-grid mb-6" id="day-grid">
+        <!-- JS sẽ render -->
+      </div>
+
+      <!-- Top người chơi -->
+      <div class="section-header">
+        <span class="section-title">Top người chơi</span>
+        <a href="#" class="section-link" onclick="navigateTo('leaderboard')">
+          Tất cả <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+        </a>
+      </div>
+      <div id="home-top-players">
+        <!-- JS sẽ render -->
+      </div>
+
+      <!-- Cách chơi -->
+      <div class="section-header mt-6">
+        <span class="section-title">Cách chơi</span>
+      </div>
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Trả lời câu hỏi</h4>
+          <p>Mỗi ngày có bộ câu hỏi mới về đa dạng lĩnh vực. Bạn có 30 giây cho mỗi câu.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Dự đoán kết quả</h4>
+          <p>Sau mỗi câu, hãy dự đoán số người trả lời đúng để nhận thêm điểm.</p>
+        </div>
+      </div>
+      <div class="step-card mb-6">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Nhận giải thưởng</h4>
+          <p>Top 3 mỗi ngày và tổng thể sau 20 ngày sẽ nhận giải thưởng hấp dẫn!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TRANG CHƠI GAME ============== -->
+  <div class="page" id="page-play">
+    <!-- Top bar -->
+    <div class="top-nav">
+      <button class="btn-outline" onclick="navigateTo('home')" style="padding: var(--space-2); border-radius: var(--radius-full); border: none; background: none; color: var(--on-surface); cursor: pointer;">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <span style="font-weight: 600;" id="play-day-title">Ngày 1 - Câu 1/3</span>
+      <div class="timer-circle" id="timer-container">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="36" fill="none" stroke="var(--surface-container-highest)" stroke-width="5"/>
+          <circle cx="40" cy="40" r="36" fill="none" stroke="var(--secondary)" stroke-width="5"
+                  stroke-dasharray="226.2" stroke-dashoffset="0" stroke-linecap="round" id="timer-circle-progress"/>
+        </svg>
+        <span class="timer-value" id="timer-value">30</span>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="px-5 mt-4">
+      <div class="progress-bar mb-4">
+        <div class="progress-fill" id="play-progress" style="width: 33%"></div>
+      </div>
+
+      <!-- Câu hỏi -->
+      <div id="question-container">
+        <div class="hero-label mb-2" id="question-label">CÂU HỎI 1</div>
+        <h3 style="font-size: var(--font-size-lg); font-weight: 700; line-height: 1.5; margin-bottom: var(--space-6);" id="question-text">
+          Đang tải câu hỏi...
+        </h3>
+
+        <!-- Đáp án -->
+        <div id="answer-options">
+          <!-- JS sẽ render -->
+        </div>
+
+        <button class="btn btn-primary btn-full btn-lg mt-6" id="btn-confirm-answer" onclick="confirmAnswer()" disabled>
+          Xác nhận
+        </button>
+      </div>
+
+      <!-- Phần dự đoán (ẩn, hiện sau khi trả lời) -->
+      <div id="prediction-container" class="hidden">
+        <div class="text-center mb-6">
+          <div style="font-size: 48px;" id="result-icon">✅</div>
+          <h3 style="font-size: var(--font-size-xl); font-weight: 700; margin-top: var(--space-3);" id="result-text">Bạn đã trả lời đúng!</h3>
+          <p class="text-muted mt-2" id="result-explanation"></p>
+        </div>
+
+        <div class="glass-card">
+          <h4 style="font-size: var(--font-size-base); font-weight: 600; text-align: center; margin-bottom: var(--space-2);">
+            Bạn nghĩ bao nhiêu người sẽ trả lời đúng?
+          </h4>
+          <p class="text-muted text-center" style="font-size: var(--font-size-xs); margin-bottom: var(--space-4);">Tổng số người chơi: ~5,000</p>
+
+          <div class="prediction-input-group">
+            <button class="prediction-btn" onclick="adjustPrediction(-100)">-</button>
+            <div class="prediction-value" id="prediction-value">2500</div>
+            <button class="prediction-btn" onclick="adjustPrediction(100)">+</button>
+          </div>
+          
+          <input type="range" id="prediction-slider" min="0" max="5000" value="2500" step="50"
+                 oninput="updatePredictionFromSlider(this.value)"
+                 style="width: 100%; margin: var(--space-3) 0; accent-color: var(--primary);">
+
+          <button class="btn btn-primary btn-full btn-lg mt-4" onclick="submitPrediction()">
+            <span class="material-symbols-outlined">send</span>
+            Gửi dự đoán
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== BẢNG XẾP HẠNG ============== -->
+  <div class="page" id="page-leaderboard">
+    <div class="top-nav">
+      <span class="logo">BVote</span>
+      <span style="font-weight: 600;">Bảng xếp hạng</span>
+      <div style="width: 36px;"></div>
+    </div>
+
+    <div class="px-5 mt-4">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchLeaderboardTab('daily')" id="tab-daily">Hôm nay</button>
+        <button class="tab-btn" onclick="switchLeaderboardTab('overall')" id="tab-overall">Tổng thể</button>
+      </div>
+
+      <!-- Podium Top 3 -->
+      <div class="podium" id="podium">
+        <!-- JS sẽ render -->
+      </div>
+
+      <!-- Xếp hạng của bạn -->
+      <div id="my-rank-container" class="mb-4">
+        <!-- JS sẽ render -->
+      </div>
+
+      <!-- Danh sách xếp hạng -->
+      <div id="leaderboard-list">
+        <!-- JS sẽ render -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== KẾT QUẢ NGÀY ============== -->
+  <div class="page" id="page-result">
+    <div class="top-nav">
+      <button style="background: none; border: none; color: var(--on-surface); cursor: pointer;" onclick="navigateTo('home')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <span style="font-weight: 600;" id="result-day-title">Kết quả Ngày 1</span>
+      <div style="width: 36px;"></div>
+    </div>
+
+    <div class="px-5 mt-4">
+      <div class="celebration-icon">🏆</div>
+      <div class="celebration-title" id="result-congrats">Chúc mừng!</div>
+      <div class="celebration-subtitle mb-6" id="result-rank-text">Bạn xếp hạng #1 hôm nay!</div>
+
+      <!-- Score breakdown -->
+      <div class="glass-card mb-4">
+        <div class="score-item">
+          <span class="score-label">Điểm trả lời</span>
+          <span class="score-value" id="result-answer-score">20/30</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">Điểm dự đoán</span>
+          <span class="score-value" id="result-prediction-score">12/15</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">Điểm tốc độ</span>
+          <span class="score-value" id="result-speed-score">7/9</span>
+        </div>
+        <div class="score-total" id="result-total-score">39</div>
+      </div>
+
+      <!-- Chi tiết từng câu -->
+      <div class="section-header">
+        <span class="section-title">Chi tiết từng câu</span>
+      </div>
+      <div id="result-answers-detail" class="mb-6">
+        <!-- JS sẽ render -->
+      </div>
+
+      <button class="btn btn-secondary btn-full mb-4" onclick="navigateTo('leaderboard')">
+        <span class="material-symbols-outlined">leaderboard</span>
+        Xem bảng xếp hạng
+      </button>
+      <button class="btn btn-primary btn-full mb-4" onclick="navigateTo('home')">
+        <span class="material-symbols-outlined">home</span>
+        Về trang chủ
+      </button>
+
+      <!-- Lịch sử kết quả -->
+      <div class="section-header mt-6">
+        <span class="section-title">Lịch sử các ngày</span>
+      </div>
+      <div id="result-history" class="mb-6">
+        <!-- JS render -->
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .admin-tabs-nav {
+      display: flex; padding: 0 var(--space-5); gap: var(--space-4); 
+      border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: var(--space-4);
+    }
+    .admin-tab-btn {
+      background: none; border: none; color: var(--on-surface-variant); 
+      padding: var(--space-3) 0; font-weight: 600; font-size: var(--font-size-sm);
+      border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s;
+    }
+    .admin-tab-btn.active {
+      color: var(--primary-light); border-bottom-color: var(--primary-light);
+    }
+    .admin-tab-content { display: none; }
+    .admin-tab-content.active { display: block; animation: slideUp 0.3s ease; }
+    
+    .player-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-3); border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .player-row:last-child { border-bottom: none; }
+  </style>
+
+  <div class="page" id="page-admin">
+    <div class="top-nav">
+      <span class="logo">BVote</span>
+      <span style="font-weight: 600;">Quản trị</span>
+      <div style="width: 36px;"></div>
+    </div>
+
+    <!-- Admin Tabs Navbar -->
+    <div class="admin-tabs-nav">
+      <button class="admin-tab-btn active" onclick="switchAdminTab('overview')" id="tab-btn-overview">Tổng quan</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('days')" id="tab-btn-days">Chiến dịch</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('players')" id="tab-btn-players">Người chơi</button>
+    </div>
+
+    <div class="px-5">
+      
+      <!-- 1. TAB TỔNG QUAN -->
+      <div id="admin-tab-overview" class="admin-tab-content active">
+        <h3 class="section-title mb-4" style="font-size: var(--font-size-md);">Số liệu vận hành</h3>
+        <div class="stat-row mb-6">
+          <div class="stat-chip">
+            <div class="stat-value" id="admin-stat-players">0</div>
+            <div class="stat-label">Người chơi</div>
+          </div>
+          <div class="stat-chip">
+            <div class="stat-value" id="admin-stat-questions">0</div>
+            <div class="stat-label">Câu hỏi</div>
+          </div>
+          <div class="stat-chip">
+            <div class="stat-value" id="admin-stat-answers">0</div>
+            <div class="stat-label">Lượt TL</div>
+          </div>
+          <div class="stat-chip">
+            <div class="stat-value" id="admin-stat-active">0</div>
+            <div class="stat-label">Ngày mở</div>
+          </div>
+        </div>
+
+        <h3 class="section-title mb-4" style="font-size: var(--font-size-md);">Lượng người chơi theo ngày</h3>
+        <div class="glass-card mb-6" style="padding: var(--space-4);">
+           <canvas id="admin-chart-canvas" style="width: 100%; height: 200px;"></canvas>
+        </div>
+
+        <h3 class="section-title mb-4" style="font-size: var(--font-size-md);">Tiến trình 20 ngày</h3>
+        <div class="glass-card mb-6">
+           <div style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 12px;">
+             <div id="admin-progress-fill" style="width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); height: 100%; transition: width 0.5s;"></div>
+           </div>
+           <p class="text-center" style="font-size: var(--font-size-sm); color: var(--secondary); font-weight: 600;"><span id="admin-days-completed-text">0</span> / 20 ngày hoàn tất</p>
+        </div>
+      </div>
+
+      <!-- 2. TAB CHIẾN DỊCH -->
+      <div id="admin-tab-days" class="admin-tab-content">
+        <!-- Days Panel -->
+        <div id="admin-days-panel">
+          <div id="admin-days-list" class="mb-6">
+            <!-- JS render -->
+          </div>
+        </div>
+
+        <!-- Questions Panel (ẩn) -->
+        <div id="admin-questions-panel" class="hidden">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5);">
+            <button style="background: none; border: none; color: var(--on-surface); cursor: pointer;" onclick="backToAdminDays()">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <span class="section-title" id="admin-q-day-title">Ngày 1</span>
+            <div style="flex: 1;"></div>
+            <button class="btn btn-primary" onclick="showAddQuestionForm()" style="padding: var(--space-2) var(--space-4); font-size: var(--font-size-sm);">
+              <span class="material-symbols-outlined" style="font-size: 18px;">add</span> Thêm
+            </button>
+          </div>
+
+          <!-- Day Actions -->
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="updateDayStatus(adminState.selectedDayId, 'ACTIVE')" style="padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs);">
+              🟢 Mở
+            </button>
+            <button class="btn btn-secondary" onclick="updateDayStatus(adminState.selectedDayId, 'CLOSED')" style="padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs);">
+              🔴 Đóng
+            </button>
+            <button class="btn btn-secondary" onclick="calculateDayScores(adminState.selectedDayId)" style="padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs);">
+              🏆 Tính điểm
+            </button>
+          </div>
+
+          <div id="admin-questions-list" class="mb-6">
+            <!-- JS render -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. TAB NGƯỜI CHƠI -->
+      <div id="admin-tab-players" class="admin-tab-content">
+        <div class="glass-card mb-6" style="padding: 0;">
+          <div style="padding: var(--space-3); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-weight: 600; font-size: var(--font-size-xs); color: var(--on-surface-variant);">
+            <span style="flex: 1;">Tài khoản</span>
+            <span style="width: 70px; text-align: center;">Ngày chơi</span>
+            <span style="width: 70px; text-align: right;">Điểm</span>
+          </div>
+          <div id="admin-players-list">
+            <!-- JS render -->
+            <div class="text-center text-muted py-4">Đang tải...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Question Modal -->
+      <div id="add-question-modal" class="hidden">
+        <div class="glass-card" style="max-height: 80vh; overflow-y: auto;">
+          <h3 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-4);">Thêm câu hỏi mới</h3>
+          <div class="form-group">
+            <label class="form-label">Nội dung câu hỏi</label>
+            <textarea class="form-input" id="q-text" rows="3" placeholder="Nhập câu hỏi..."></textarea>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+            <div class="form-group">
+              <label class="form-label">Đáp án A</label>
+              <input class="form-input" id="q-opt-a" placeholder="A">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Đáp án B</label>
+              <input class="form-input" id="q-opt-b" placeholder="B">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Đáp án C</label>
+              <input class="form-input" id="q-opt-c" placeholder="C">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Đáp án D</label>
+              <input class="form-input" id="q-opt-d" placeholder="D">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Đáp án đúng</label>
+            <select class="form-input" id="q-correct">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Giải thích (tùy chọn)</label>
+            <input class="form-input" id="q-explain" placeholder="Giải thích đáp án">
+          </div>
+          <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4);">
+            <button class="btn btn-outline" onclick="hideAddQuestionForm()" style="flex: 1;">Hủy</button>
+            <button class="btn btn-primary" onclick="saveQuestion()" style="flex: 1;">Lưu</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============== TRANG PROFILE ============== -->
+  <div class="page" id="page-profile">
+    <div class="top-nav">
+      <span class="logo">BVote</span>
+      <span style="font-weight: 600;">Tài khoản</span>
+      <div style="width: 36px;"></div>
+    </div>
+
+    <div class="px-5 mt-4">
+      <!-- Avatar & Info -->
+      <div class="text-center mb-6">
+        <div class="user-avatar" style="width: 80px; height: 80px; font-size: var(--font-size-3xl); margin: 0 auto var(--space-4);" id="profile-avatar">P</div>
+        <h2 style="font-size: var(--font-size-xl); font-weight: 700;" id="profile-name">Player</h2>
+        <p class="text-muted" id="profile-email">player@test.vn</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-row mb-6">
+        <div class="stat-chip">
+          <div class="stat-value" id="profile-days">0</div>
+          <div class="stat-label">Ngày chơi</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-value" id="profile-score">0</div>
+          <div class="stat-label">Tổng điểm</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-value" id="profile-correct">0</div>
+          <div class="stat-label">Câu đúng</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <button class="btn btn-outline btn-full mb-4" onclick="logout()">
+        <span class="material-symbols-outlined">logout</span>
+        Đăng xuất
+      </button>
+
+      <!-- Lịch sử chơi -->
+      <div class="section-header mt-6">
+        <span class="section-title">Lịch sử chơi</span>
+      </div>
+      <div id="profile-history" class="mb-4">
+        <!-- JS render -->
+      </div>
+
+      <!-- Version -->
+      <div class="text-center mb-6" style="padding: var(--space-4);">
+        <p class="text-muted" style="font-size: var(--font-size-xs);">BVote Mini Game v1.0</p>
+        <p class="text-muted" style="font-size: var(--font-size-xs);">Made with ❤️ by BVote Team</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== BOTTOM NAVIGATION ============== -->
+  <div class="bottom-nav hidden" id="bottom-nav">
+    <button class="nav-item active" onclick="navigateTo('home')" id="nav-home">
+      <span class="material-symbols-outlined">play_circle</span>
+      <span>Play</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('leaderboard')" id="nav-leaderboard">
+      <span class="material-symbols-outlined">leaderboard</span>
+      <span>Xếp hạng</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('result')" id="nav-result">
+      <span class="material-symbols-outlined">emoji_events</span>
+      <span>Kết quả</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('profile')" id="nav-profile">
+      <span class="material-symbols-outlined">person</span>
+      <span>Tài khoản</span>
+    </button>
+    <button class="nav-item hidden" onclick="navigateTo('admin')" id="nav-admin">
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+      <span>Admin</span>
+    </button>
+  </div>
+
+  <!-- Custom Confirm Dialog -->
+  <div id="confirm-dialog" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+    <div class="glass-card animate-bounceIn" style="max-width: 340px; width: 90%; text-align: center;">
+      <span class="material-symbols-outlined" style="font-size: 48px; color: var(--warning); display: block; margin-bottom: var(--space-3);">help</span>
+      <p id="confirm-message" style="font-weight: 600; margin-bottom: var(--space-5); line-height: 1.5;">Bạn có chắc chắn?</p>
+      <div style="display: flex; gap: var(--space-3);">
+        <button class="btn btn-outline" onclick="hideConfirmDialog()" style="flex: 1;">Hủy</button>
+        <button class="btn btn-primary" id="btn-confirm-action" onclick="confirmAction()" style="flex: 1;">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/game.js"></script>
+<script src="/js/leaderboard.js"></script>
+<script src="/js/admin.js"></script>
+<script src="/js/confetti.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
