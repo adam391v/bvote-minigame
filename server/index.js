@@ -166,10 +166,10 @@ async function start() {
     console.log('⚠️  Server vẫn khởi động nhưng DB chưa kết nối');
   }
 
-  server.listen(PORT, () => {
-    console.log(`\n🚀 Server đang chạy tại: http://localhost:${PORT}`);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n🚀 Server đang chạy tại: http://0.0.0.0:${PORT}`);
     console.log(`📁 Static files: ${path.join(__dirname, '..', 'client')}`);
-    console.log(`📡 API: http://localhost:${PORT}/api`);
+    console.log(`📡 API: http://0.0.0.0:${PORT}/api`);
     console.log(`🔒 Security: Helmet + CORS + Rate Limit`);
     console.log(`🌍 Env: ${process.env.NODE_ENV || 'development'}\n`);
   });

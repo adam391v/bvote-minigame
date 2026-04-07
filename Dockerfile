@@ -19,5 +19,5 @@ ENV NODE_ENV=production
 # Railway tự gán PORT, không hardcode EXPOSE
 # EXPOSE sẽ do Railway tự quản lý
 
-# Khởi động: migrate database rồi chạy server
-CMD ["sh", "-c", "node server/config/migrate.js && node server/index.js"]
+# Khởi động: server/index.js đã tự động gọi hàm migrate
+CMD ["node", "server/index.js"]
