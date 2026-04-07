@@ -3,9 +3,6 @@
  * Express server phục vụ API + Static files
  * Bổ sung: Helmet, Rate Limiting, CORS config, Error handling
  */
-process.on('uncaughtException', (err) => console.error('🔥 LÕI QUAN TRỌNG CHƯA BẮT ĐƯỢC:', err));
-process.on('unhandledRejection', (reason, promise) => console.error('🔥 PROMISE CHƯA BẮT ĐƯỢC:', reason));
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -23,6 +20,10 @@ const leaderboardRoutes = require('./routes/leaderboard.routes');
 const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
+
+// Khai báo cho app biết nó đang nằm sau Proxy của Railway
+app.set('trust proxy', 1);
+
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
